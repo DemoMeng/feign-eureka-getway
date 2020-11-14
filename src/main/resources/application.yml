@@ -1,0 +1,36 @@
+server:
+  port: 5035
+
+
+spring:
+  application:
+    name: feign-eureka-getway
+
+  cloud:
+    gateway:
+      routes:
+        - id: feign-server-provider-route
+          #单机配置指定域名及端口
+          #uri: http://127.0.0.1:3033
+          #负载配置
+          uri: lb://feign-server-provider
+          predicates:
+            - Path=/feign-server-provider/**
+        - id: feign-client-consumer-route
+          #单机配置指定域名及端口
+          #uri: http://127.0.0.1:3034
+          #负载配置
+          uri: lb://feign-client-consumer
+          predicates:
+            - Path=/feign-client-consumer/**
+      discovery:
+        locator:
+          enabled: true
+
+
+
+#指定eureka注册中心地址，其他按照默认配置
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
