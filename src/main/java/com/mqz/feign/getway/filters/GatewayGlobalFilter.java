@@ -8,6 +8,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -17,6 +18,7 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
@@ -45,13 +47,15 @@ public class GatewayGlobalFilter implements GlobalFilter, Ordered {
         //根据请求路径拦截、放行指定的请求
         String path = uri.getPath();
         if(needPermission.contains(path)){
-            String tokenValue = serverHttpRequest.getQueryParams().g
+            List<String> tokenList = serverHttpRequest.getQueryParams().get("token");
+            if(CollectionUtils.isEmpty(tokenList)){
+                throw new WithoutLoginException();
+            }
+            String tokenValue = tokenList.get(0);
             if(StringUtils.isEmpty(tokenValue)){
                 throw new WithoutLoginException();
             }
         }
-
-
 
         //URL请求参数
         MultiValueMap<String,String> map = serverHttpRequest.getQueryParams();
